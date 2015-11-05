@@ -62,7 +62,7 @@ func getPayload(m *Move) string {
 
 	t := payload.Transition{From: &from, To: &to}
 
-	s := []string{"", ""}
+	s := getAllStatus(m.Workflow)
 
 	issue := payload.Issue{ID: &i.ID}
 	p := payload.Payload{
@@ -78,4 +78,28 @@ func getPayload(m *Move) string {
 		return ""
 	}
 	return string(body)
+}
+
+func getAllStatus(w Workflow) []string {
+	status := []string{}
+	for _, t := range w.Transitions {
+		addFrom := true
+		addTo := true
+		for _, s := range status {
+			if s == t.To {
+				addTo = false
+			}
+			if s == t.From {
+				addFrom = false
+			}
+		}
+		if addFrom == true {
+			status = append(status, string(t.From))
+		}
+		if addTo == true {
+			status = append(status, string(t.To))
+		}
+	}
+
+	return status
 }
