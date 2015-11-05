@@ -1,0 +1,34 @@
+{
+  "issue": {
+    "id": "supu-io/test/1",
+    "number": "1",
+    "repo": "test",
+    "owner": "supu-io",
+    "status": "todo"
+  },
+  "status": "doing",
+  "config": {
+    "github": {
+      "token": "token"
+    }
+  },
+  "workflow": {
+    "transitions": [
+      {
+        "from": "created", 
+        "to": "todo",
+        "hooks": []
+      },
+      {
+        "from": "todo", 
+        "to": "doing",
+        "hooks": []
+      },
+      {
+        "from": "doing", 
+        "to": "done",
+        "hooks": []
+      }
+    ]
+  }
+}
