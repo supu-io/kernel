@@ -6,13 +6,14 @@ import (
 	"runtime"
 
 	"github.com/nats-io/nats"
+	"github.com/supu-io/messages"
 )
 
 func main() {
 	nc, _ := nats.Connect(nats.DefaultURL)
 
 	nc.Subscribe("workflow.move", func(msg *nats.Msg) {
-		m := Move{}
+		m := messages.UpdateIssue{}
 		json.Unmarshal(msg.Data, &m)
 		if err := move(&m); err != nil {
 			e := ErrorMessage{Error: err.Error()}

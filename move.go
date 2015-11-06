@@ -6,11 +6,12 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/supu-io/messages"
 	"github.com/supu-io/payload"
 )
 
 // Move ...
-func move(m *Move) error {
+func move(m *messages.UpdateIssue) error {
 	t := getTransition(m)
 	if t == nil {
 		return errors.New("Invalid transition")
@@ -20,9 +21,9 @@ func move(m *Move) error {
 	return nil
 }
 
-func getTransition(m *Move) *Transition {
+func getTransition(m *messages.UpdateIssue) *messages.Transition {
 	from := m.Issue.Status
-	to := *m.Status
+	to := m.Status
 	for _, t := range m.Workflow.Transitions {
 		if t.From == from && t.To == to {
 			return &t
@@ -32,14 +33,14 @@ func getTransition(m *Move) *Transition {
 	return nil
 }
 
-func callHooks(m *Move, t *Transition) {
+func callHooks(m *messages.UpdateIssue, t *messages.Transition) {
 	p := getPayload(m)
 	for _, h := range t.Hooks {
 		hook(h, p)
 	}
 }
 
-func hook(hook Hook, p string) {
+func hook(hook messages.Hook, p string) {
 	req, err := http.NewRequest("POST", hook.URL, nil)
 	// TODO: We will need at some point to support tokens
 	// req.Header.Add("X-AUTH-TOKEN", "token")
@@ -51,9 +52,9 @@ func hook(hook Hook, p string) {
 	}
 }
 
-func getPayload(m *Move) string {
+func getPayload(m *messages.UpdateIssue) string {
 	from := m.Issue.Status
-	to := *m.Status
+	to := m.Status
 
 	c := m.Config
 	i := m.Issue
@@ -80,7 +81,7 @@ func getPayload(m *Move) string {
 	return string(body)
 }
 
-func getAllStatus(w Workflow) []string {
+func getAllStatus(w messages.Workflow) []string {
 	status := []string{}
 	for _, t := range w.Transitions {
 		addFrom := true

@@ -14,9 +14,10 @@ import (
 
 	"github.com/gorilla/mux"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/supu-io/messages"
 )
 
-func getMessage() *Move {
+func getMessage() *messages.UpdateIssue {
 	source := "fixtures/move.json"
 	absPath, _ := filepath.Abs(source)
 	file, err := os.Open(absPath)
@@ -26,7 +27,7 @@ func getMessage() *Move {
 	}
 
 	decoder := json.NewDecoder(file)
-	m := Move{}
+	m := messages.UpdateIssue{}
 	err = decoder.Decode(&m)
 	if err != nil {
 		log.Println("Definition file is invalid")
@@ -51,7 +52,6 @@ func mockServer(route string, method string, status int, output string) *httptes
 		w.WriteHeader(status)
 		w.Header().Set("X-Auth-Token", "")
 		fmt.Fprint(w, s)
-		println("supu")
 		wg.Done()
 	}).Methods(method)
 
@@ -65,7 +65,7 @@ func TestInvalidTransition(t *testing.T) {
 			server := mockServer("/", "POST", 200, "hello")
 			m := getMessage()
 			for i, t := range m.Workflow.Transitions {
-				m.Workflow.Transitions[i].Hooks = append(t.Hooks, Hook{URL: server.URL})
+				m.Workflow.Transitions[i].Hooks = append(t.Hooks, messages.Hook{URL: server.URL})
 			}
 			m.Issue.Status = "done"
 			move(m)
@@ -91,9 +91,13 @@ func TestValidTransitionXX(t *testing.T) {
 			m := getMessage()
 			wg.Add(1)
 			for i, t := range m.Workflow.Transitions {
-				m.Workflow.Transitions[i].Hooks = append(t.Hooks, Hook{URL: server.URL})
+				m.Workflow.Transitions[i].Hooks = append(t.Hooks, messages.Hook{URL: server.URL})
 			}
-			move(m)
+			err := move(m)
+			if err != nil {
+				t.Error(err.Error())
+				wg.Done()
+			}
 			wg.Wait()
 		})
 	})
