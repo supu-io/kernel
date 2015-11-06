@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"log"
@@ -41,9 +42,10 @@ func callHooks(m *messages.UpdateIssue, t *messages.Transition) {
 }
 
 func hook(hook messages.Hook, p string) {
-	req, err := http.NewRequest("POST", hook.URL, nil)
+	req, err := http.NewRequest("POST", hook.URL, bytes.NewBuffer([]byte(p)))
 	// TODO: We will need at some point to support tokens
 	// req.Header.Add("X-AUTH-TOKEN", "token")
+	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	_, err = client.Do(req)
 
